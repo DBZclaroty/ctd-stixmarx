@@ -30,15 +30,19 @@ def _initialize_fields():
     utils._load_maec()
     utils._load_mixbox()
 
-    user_path = os.path.join(os.path.expanduser("~"), ".stixmarx")
-    if os.path.isdir(user_path) is False:
-        os.makedirs(user_path)
-        LOG.debug("Created directory '%s'", user_path)
+    if workdir_path := os.getenv("STIXMARX_WORKDIR_PATH"):
+        field_load_path = os.path.join(workdir_path, ".stixmarx")
+    else:
+        field_load_path = os.path.join(os.path.expanduser("~"), ".stixmarx")
+
+    if os.path.isdir(field_load_path) is False:
+        os.makedirs(field_load_path)
+        LOG.debug("Created directory '%s'", field_load_path)
 
     for loaded_module, module_name in ((utils.stix, "stix"), (utils.cybox, "cybox"), (utils.maec, "maec")):
         if loaded_module:
             fname = module_name + loaded_module.__version__.replace(".", "") + ".json"
-            file_location = os.path.join(user_path, fname)
+            file_location = os.path.join(field_load_path, fname)
 
             if os.path.isfile(file_location) is False:
                 message = "Generating compatible mappings for %s %s"
